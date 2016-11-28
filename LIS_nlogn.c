@@ -2,35 +2,58 @@
 #include<stdio.h>
 #include<stdlib.h>
 
-int ceilindex(int tail[],int l,int r,int key){
-    while(r-l>1)
-    {
-    int m=l+(r-l)/2;
-    if(tail[m]>=key)
-    r=m;
-    else
-    l=m;
+int ceilindex(int input[], int T[], int end, int s){
+        int start = 0;
+        int middle;
+        int len = end;
+        while(start <= end){
+            middle = (start + end)/2;
+            if(middle < len && input[T[middle]] < s && s <= input[T[middle+1]]){
+                return middle+1;
+            }else if(input[T[middle]] < s){
+                start = middle+1;
+            }else{
+                end = middle-1;
+            }
+        }
+        return -1;
     }
-    return r;
-}
-
 int lis(int v[],int n){
-    if(n==0)
-    return 0;
-    
-    int tail[n];
-    int length=1,i;
-    tail[0]=v[0];
-    
-    for(i=1;i<n;i++){
-        if(v[i]<tail[0])
-        tail[0]=v[i];
-        else if(v[i]>tail[length-1])
-        tail[length++]=v[i];
-        else
-        tail[ceilindex(tail,-1,length-1,v[i])]=v[i];
+    int T[n];
+    int R[n];
+    for(int i=0; i < n ; i++) {
+        R[i] = -1;
     }
-    return length;
+    T[0] = 0;
+    int len = 0;
+    for(int i=1; i < n; i++){
+        if(v[T[0]] > v[i]){ //if input[i] is less than 0th value of T then replace it there.
+            T[0] = i;
+        }else if(v[T[len]] < v[i]){ //if input[i] is greater than last value of T then append it in T
+            len++;
+            T[len] = i;
+            R[T[len]] = T[len-1];
+        }else{ //do a binary search to find ceiling of input[i] and put it there.
+            int index = ceilindex(v, T, len,v[i]);
+            T[index] = i;
+            R[T[index]] = T[index-1];
+        }
+    }
+    int final[len+1],j=len;
+    int index = T[len];
+        while(index != -1) {
+            //printf("%d ",v[index] );
+            final[j]=v[index];
+            j--;
+            index = R[index];
+        }
+        
+
+    for(int i=0; i < len+1; i++){
+        printf("%d ",final[i]);
+    }
+    printf("\n");
+    return len+1;
 }
 
 int main()
